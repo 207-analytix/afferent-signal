@@ -24,15 +24,15 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./frontend
-        run: npm ci
+        run: npm install
 
       - name: Build static export
         working-directory: ./frontend
         env:
-          NEXT_PUBLIC_SUPABASE_URL:      ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          NEXT_PUBLIC_DASHBOARD_KEYS:    ${{ secrets.NEXT_PUBLIC_DASHBOARD_KEYS }}
-          NEXT_PUBLIC_BASE_PATH:         ${{ secrets.NEXT_PUBLIC_BASE_PATH }}
+          NEXT_PUBLIC_SUPABASE_URL: https://wznicchxpogzdiqeyckg.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_iDUHjsXn1hok3uGcfRU7dg_T7P7XEyG
+          NEXT_PUBLIC_DASHBOARD_KEYS: ${{ secrets.NEXT_PUBLIC_DASHBOARD_KEYS }}
+          NEXT_PUBLIC_BASE_PATH: /afferent-signal
         run: npm run build
 
       - name: Deploy to GitHub Pages
