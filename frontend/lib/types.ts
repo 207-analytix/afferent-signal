@@ -1,6 +1,10 @@
-export type IntentType = 'OUT_OF_STOCK' | 'PRODUCT_REQUEST' | 'LOCATION_INQUIRY' | 'UNCLEAR';
+export type IntentType =
+  | 'OUT_OF_STOCK'
+  | 'PRODUCT_REQUEST'
+  | 'LOCATION_INQUIRY'
+  | 'UNCLEAR';
 
-export type IntentSignal = {
+export interface IntentSignal {
   signal_id: string;
   store_id: string;
   timestamp: string;
@@ -14,9 +18,9 @@ export type IntentSignal = {
   processing_status: string;
   created_at: string;
   updated_at: string;
-};
+}
 
-export type AnalyticsSummary = {
+export interface AnalyticsSummary {
   total_signals: number;
   high_urgency_count: number;
   pending_triage_count: number;
@@ -25,4 +29,4 @@ export type AnalyticsSummary = {
   urgency_breakdown: Record<string, number>;
   top_brands: { brand: string; count: number }[];
   daily_series: { date: string; count: number }[];
-};
+}

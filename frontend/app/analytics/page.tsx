@@ -2,119 +2,147 @@
 import { useEffect, useState } from 'react';
 import { fetchAnalytics } from '@/lib/api';
 import type { AnalyticsSummary } from '@/lib/types';
+import AuthGuard from '@/components/AuthGuard';
 
-const INTENT_COLORS: Record<string,string> = {
-  OUT_OF_STOCK:     '#ef4444',
-  PRODUCT_REQUEST:  '#3b82f6',
-  LOCATION_INQUIRY: '#f59e0b',
-  UNCLEAR:          '#a8a29e',
+const INTENT_COLORS: Record<string, string> = {
+  OUT_OF_STOCK:     'bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300',
+  PRODUCT_REQUEST:  'bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300',
+  LOCATION_INQUIRY: 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300',
+  UNCLEAR:          'bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-300',
 };
 
-function Bar({ value, max, color }: { value: number; max: number; color: string }) {
-  const pct = max > 0 ? (value / max) * 100 : 0;
-  return (
-    <div className="flex items-center gap-2">
-      <div className="flex-1 h-2.5 rounded-full bg-stone-100 dark:bg-stone-800 overflow-hidden">
-        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: color }}/>
-      </div>
-      <span className="text-xs tabular-nums text-stone-500 w-6 text-right">{value}</span>
-    </div>
-  );
-}
-
 export default function AnalyticsPage() {
-  const [data,    setData]    = useState<AnalyticsSummary | null>(null);
+  const [data, setData] = useState<AnalyticsSummary | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchAnalytics().then(setData).finally(() => setLoading(false));
-    const id = setInterval(() => fetchAnalytics().then(setData), 60_000);
-    return () => clearInterval(id);
+    fetchAnalytics()
+      .then(setData)
+      .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="space-y-4">{[...Array(3)].map((_,i)=><div key={i} className="skeleton h-48 w-full rounded-2xl"/>)}</div>;
-  if (!data) return <p className="text-stone-400">Failed to load analytics.</p>;
+  if (loading) {
+    return (
+      <AuthGuard>
+        <div className="space-y-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="skeleton h-24 rounded-3xl" />
+          ))}
+        </div>
+      </AuthGuard>
+    );
+  }
 
-  const maxIntent  = Math.max(...Object.values(data.intent_breakdown));
-  const maxUrgency = Math.max(...Object.values(data.urgency_breakdown));
-  const maxBrand   = data.top_brands[0]?.count ?? 1;
-  const maxDay     = Math.max(...data.daily_series.map(d => d.count), 1);
+  if (!data) return <AuthGuard><p className="text-stone-400 p-8">No analytics data.</p></AuthGuard>;
+
+  const maxDay = Math.max(...data.daily_series.map((d) => d.count), 1);
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-xl font-bold text-stone-900 dark:text-stone-50">Analytics</h1>
+    <AuthGuard>
+      <div className="space-y-6">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-stone-400">Performance Overview</p>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-50">Analytics</h1>
+        </div>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        {[
-          { label: 'Total Signals',   value: data.total_signals },
-          { label: 'High Urgency',    value: data.high_urgency_count },
-          { label: 'Pending Triage',  value: data.pending_triage_count },
-          { label: 'Top Brand',       value: data.top_brand },
-        ].map(({ label, value }) => (
-          <div key={label} className="rounded-2xl border border-stone-200 bg-white p-4 dark:border-stone-800 dark:bg-stone-900">
-            <p className="text-xs font-semibold uppercase tracking-widest text-stone-400">{label}</p>
-            <p className="mt-1 text-2xl font-bold tabular-nums text-stone-900 dark:text-stone-50">{value}</p>
+        {/* KPI row */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {[
+            ['Total Signals', String(data.total_signals)],
+            ['High Urgency', String(data.high_urgency_count)],
+            ['Pending Triage', String(data.pending_triage_count)],
+          ].map(([label, value]) => (
+            <div key={label} className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm dark:border-stone-800 dark:bg-stone-900">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-400">{label}</p>
+              <p className="mt-3 text-3xl font-bold tracking-tight text-stone-900 dark:text-stone-50">{value}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Intent breakdown */}
+        <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm dark:border-stone-800 dark:bg-stone-900">
+          <h2 className="mb-4 text-sm font-semibold text-stone-800 dark:text-stone-200">Intent Breakdown</h2>
+          <div className="flex flex-wrap gap-3">
+            {Object.entries(data.intent_breakdown).map(([intent, count]) => (
+              <div key={intent} className={`rounded-2xl px-4 py-2 text-sm font-semibold ${INTENT_COLORS[intent] ?? 'bg-stone-100 text-stone-600'}`}>
+                {intent.replace(/_/g, ' ')} &mdash; {count}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="rounded-2xl border border-stone-200 bg-white p-5 dark:border-stone-800 dark:bg-stone-900 space-y-4">
-          <h2 className="text-sm font-semibold text-stone-700 dark:text-stone-300">Intent Breakdown</h2>
-          {Object.entries(data.intent_breakdown).map(([intent, count]) => (
-            <div key={intent}>
-              <div className="flex justify-between text-xs text-stone-500 mb-1">
-                <span>{intent.replace(/_/g,' ')}</span>
-              </div>
-              <Bar value={count} max={maxIntent} color={INTENT_COLORS[intent] ?? '#a8a29e'}/>
-            </div>
-          ))}
         </div>
 
-        <div className="rounded-2xl border border-stone-200 bg-white p-5 dark:border-stone-800 dark:bg-stone-900 space-y-4">
-          <h2 className="text-sm font-semibold text-stone-700 dark:text-stone-300">Urgency Distribution</h2>
-          {Object.entries(data.urgency_breakdown).map(([score, count]) => (
-            <div key={score}>
-              <div className="flex justify-between text-xs text-stone-500 mb-1">
-                <span>Score {score}</span>
-              </div>
-              <Bar value={count} max={maxUrgency} color={Number(score) >= 4 ? '#ef4444' : Number(score) === 3 ? '#f59e0b' : '#01696f'}/>
-            </div>
-          ))}
+        {/* Urgency breakdown */}
+        <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm dark:border-stone-800 dark:bg-stone-900">
+          <h2 className="mb-4 text-sm font-semibold text-stone-800 dark:text-stone-200">Urgency Distribution</h2>
+          <div className="flex items-end gap-3 h-28">
+            {Object.entries(data.urgency_breakdown).map(([score, count]) => {
+              const maxCount = Math.max(...Object.values(data.urgency_breakdown), 1);
+              const pct = Math.round((count / maxCount) * 100);
+              const barColor = Number(score) >= 4 ? 'bg-rose-500' : Number(score) >= 3 ? 'bg-amber-400' : 'bg-teal-500';
+              return (
+                <div key={score} className="flex flex-1 flex-col items-center gap-1">
+                  <span className="text-xs font-semibold text-stone-500">{count}</span>
+                  <div className={`w-full rounded-t-lg ${barColor}`} style={{ height: `${pct}%`, minHeight: 4 }} />
+                  <span className="text-xs text-stone-400">U{score}</span>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
-        <div className="rounded-2xl border border-stone-200 bg-white p-5 dark:border-stone-800 dark:bg-stone-900 space-y-4">
-          <h2 className="text-sm font-semibold text-stone-700 dark:text-stone-300">Top Brands</h2>
-          {data.top_brands.length === 0
-            ? <p className="text-sm text-stone-400">No brand data yet.</p>
-            : data.top_brands.map(({ brand, count }) => (
-              <div key={brand}>
-                <div className="text-xs text-stone-500 mb-1">{brand}</div>
-                <Bar value={count} max={maxBrand} color="#01696f"/>
-              </div>
-            ))
-          }
+        {/* 14-day sparkline */}
+        <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm dark:border-stone-800 dark:bg-stone-900">
+          <h2 className="mb-4 text-sm font-semibold text-stone-800 dark:text-stone-200">Signals — Last 14 Days</h2>
+          <div className="flex items-end gap-1 h-28">
+            {data.daily_series.map(({ date, count }) => {
+              const pct = Math.round((count / maxDay) * 100);
+              return (
+                <div key={date} className="group relative flex flex-1 flex-col items-center">
+                  <div
+                    className="w-full rounded-t-sm bg-teal-500/70 hover:bg-teal-600 transition-all"
+                    style={{ height: `${pct}%`, minHeight: count > 0 ? 4 : 0 }}
+                  />
+                  <span className="mt-1 hidden text-[10px] text-stone-400 group-hover:block absolute -bottom-5 whitespace-nowrap">
+                    {date.slice(5)}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          <div className="mt-2 flex justify-between text-[10px] text-stone-400">
+            <span>{data.daily_series[0]?.date?.slice(5)}</span>
+            <span>{data.daily_series[13]?.date?.slice(5)}</span>
+          </div>
         </div>
 
-        <div className="rounded-2xl border border-stone-200 bg-white p-5 dark:border-stone-800 dark:bg-stone-900">
-          <h2 className="text-sm font-semibold text-stone-700 dark:text-stone-300 mb-4">14-Day Signal Volume</h2>
-          {data.daily_series.length === 0
-            ? <p className="text-sm text-stone-400">No data yet.</p>
-            : (
-              <div className="flex items-end gap-1 h-32">
-                {data.daily_series.map(({ date, count }) => (
-                  <div key={date} className="flex flex-col items-center gap-1 flex-1" title={`${date}: ${count}`}>
-                    <div className="w-full rounded-t-sm bg-teal-500/80 transition-all" style={{ height: `${(count/maxDay)*100}%`, minHeight: count > 0 ? '4px' : '0' }}/>
-                    <span className="text-[10px] text-stone-400 rotate-45 origin-left whitespace-nowrap hidden sm:block">
-                      {date.slice(5)}
-                    </span>
+        {/* Top brands */}
+        <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm dark:border-stone-800 dark:bg-stone-900">
+          <h2 className="mb-4 text-sm font-semibold text-stone-800 dark:text-stone-200">Top Extracted Brands</h2>
+          {data.top_brands.length === 0 ? (
+            <p className="text-sm text-stone-400">No brand data yet.</p>
+          ) : (
+            <div className="space-y-2">
+              {data.top_brands.map(({ brand, count }, i) => {
+                const pct = Math.round((count / (data.top_brands[0]?.count ?? 1)) * 100);
+                return (
+                  <div key={brand} className="flex items-center gap-3">
+                    <span className="w-5 text-right text-xs font-semibold text-stone-400">{i + 1}</span>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-0.5">
+                        <span className="text-sm font-medium text-stone-700 dark:text-stone-200">{brand}</span>
+                        <span className="text-xs text-stone-400">{count}</span>
+                      </div>
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-stone-100 dark:bg-stone-800">
+                        <div className="h-full rounded-full bg-teal-500" style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
                   </div>
-                ))}
-              </div>
-            )
-          }
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
-    </div>
+    </AuthGuard>
   );
 }

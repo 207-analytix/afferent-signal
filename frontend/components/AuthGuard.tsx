@@ -1,17 +1,23 @@
 'use client';
 import { useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const { authed } = useAuth();
   const router = useRouter();
-  const pathname = usePathname();
 
   useEffect(() => {
-    if (!authed && pathname !== '/login') router.replace('/login');
-  }, [authed, pathname, router]);
+    if (!authed) router.replace('/login');
+  }, [authed, router]);
 
-  if (!authed) return null;
+  if (!authed) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-teal-600 border-t-transparent" />
+      </div>
+    );
+  }
+
   return <>{children}</>;
 }
