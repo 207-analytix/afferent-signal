@@ -28,7 +28,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./frontend
-        run: npm install --legacy-peer-deps
+        run: npm install --force 2>&1
 
       - name: Build static export
         working-directory: ./frontend
@@ -38,7 +38,7 @@ jobs:
           NEXT_PUBLIC_DASHBOARD_KEYS: ${{ secrets.NEXT_PUBLIC_DASHBOARD_KEYS }}
           NEXT_PUBLIC_BASE_PATH: /afferent-signal
           NEXT_TELEMETRY_DISABLED: 1
-        run: npm run build
+        run: npm run build 2>&1
 
       - name: Add .nojekyll
         run: touch ./frontend/out/.nojekyll
