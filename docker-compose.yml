@@ -1,0 +1,61 @@
+# ==========================================================================
+# AFFERENT SIGNAL — Docker Compose
+# Brings up: FastAPI backend (:8000) + Next.js frontend (:3000)
+#
+# Usage:
+#   docker compose up --build
+#
+# Prerequisites:
+#   - Copy backend/.env.example → backend/.env and fill in values
+#   - Copy nextjs/.env.example  → nextjs/.env.local and fill in values
+# ==========================================================================
+
+version: "3.9"
+
+services:
+
+  # ── FastAPI Backend ─────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: afferent-signal-api
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - afferent-net
+
+  # ── Next.js Frontend ────────────────────────────────────────
+  frontend:
+    build:
+      context: ./nextjs
+      dockerfile: Dockerfile
+    container_name: afferent-signal-web
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./nextjs/.env.local
+    volumes:
+      - ./nextjs:/app
+      - /app/node_modules
+      - /app/.next
+    command: npm run dev
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - afferent-net
+
+networks:
+  afferent-net:
+    driver: bridge
