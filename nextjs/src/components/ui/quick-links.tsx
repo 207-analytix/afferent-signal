@@ -1,33 +1,34 @@
+import Link from "next/link";
+
 interface QuickLink {
-  icon: string;
   label: string;
   href: string;
+  icon: string;
   color: string;
 }
 
-interface QuickLinksProps {
-  links: QuickLink[];
-}
+const LINKS: QuickLink[] = [
+  { label: "My Requests", href: "/requests", icon: "📋", color: "bg-blue-100" },
+  { label: "Campaigns",   href: "/campaigns", icon: "📣", color: "bg-emerald-100" },
+  { label: "Premium",     href: "/premium",   icon: "⭐", color: "bg-amber-100" },
+];
 
-export function QuickLinks({ links }: QuickLinksProps) {
+export default function QuickLinks() {
   return (
-    <div className="grid grid-cols-3 gap-3">
-      {links.map((link) => (
-        <a
-          key={link.href}
-          href={link.href}
-          className="flex flex-col items-center gap-2 p-3 bg-white rounded-2xl ring-1 ring-slate-200/80 hover:shadow-md transition-all"
-          style={{ boxShadow: "0 4px 12px rgba(37,99,235,0.06)" }}
+    <div className="grid grid-cols-3 gap-3 py-2">
+      {LINKS.map(({ label, href, icon, color }) => (
+        <Link
+          key={href}
+          href={href}
+          className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-white ring-1 ring-slate-200/80 hover:shadow-md transition-all"
         >
-          <div
-            className={`w-10 h-10 rounded-2xl flex items-center justify-center text-xl ${link.color}`}
-          >
-            {link.icon}
-          </div>
-          <span className="text-xs font-semibold text-slate-600 text-center leading-tight">
-            {link.label}
+          <span className={`w-10 h-10 rounded-2xl ${color} flex items-center justify-center text-xl`}>
+            {icon}
           </span>
-        </a>
+          <span className="text-xs font-semibold text-slate-600 text-center leading-tight">
+            {label}
+          </span>
+        </Link>
       ))}
     </div>
   );
