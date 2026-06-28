@@ -38,7 +38,7 @@ export default function SubmitPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Please sign in to submit a request.");
 
-      const { error: err } = await supabase.from("product_requests").insert({
+      const { error: dbError } = await supabase.from("product_requests").insert({
         user_id: user.id,
         store_id: form.store_id || null,
         product_name: form.product_name,
@@ -47,14 +47,14 @@ export default function SubmitPage() {
         user_note: form.user_note || null,
         status: "PENDING",
       });
-      if (err) throw err;
+      if (dbError) throw dbError;
 
       // Also send to FastAPI ingestion pipeline
       await fetch("/api/signal-capture", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          raw_input: `${form.product_name} ${form.brand_name} ${form.user_note}`.trim(),
+          raw_input: [form.product_name, form.brand_name, form.user_note].filter(Boolean).join(" "),
           store_id: form.store_id || null,
           intent_type: "PRODUCT_REQUEST",
         }),
@@ -77,7 +77,7 @@ export default function SubmitPage() {
           </div>
           <h2 className="text-2xl font-extrabold text-slate-800 mb-2">Request submitted!</h2>
           <p className="text-slate-500 mb-8 max-w-[28ch]">
-            We've sent your request to your store. We'll let you know when it's fulfilled.
+            We&apos;ve sent your request to your store. We&apos;ll let you know when it&apos;s fulfilled.
           </p>
           <a
             href="/requests"
@@ -127,7 +127,7 @@ export default function SubmitPage() {
               <input
                 value={form.brand_name}
                 onChange={(e) => update("brand_name", e.target.value)}
-                placeholder="e.g., Oatly, Bob's Red Mill…"
+                placeholder="e.g., Oatly, Bob&apos;s Red Mill…"
                 className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -194,7 +194,7 @@ export default function SubmitPage() {
                   ].join(" ")}
                 >
                   <p className="text-sm font-semibold text-slate-800">Not sure / Any store</p>
-                  <p className="text-xs text-slate-400">We'll route it to the best match</p>
+                  <p className="text-xs text-slate-400">We&apos;ll route it to the best match</p>
                 </button>
               </div>
             </div>
