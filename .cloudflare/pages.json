@@ -1,0 +1,11 @@
+{
+  "build": {
+    "base_directory": "nextjs",
+    "command": "npm install && npm run build",
+    "destination_directory": ".next"
+  },
+  "compatibility": {
+    "date": "2026-06-27",
+    "flags": ["nodejs_compat"]
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "description": "Route rules for Afferent Signal — protects /ops from public access",
+  "include": ["/*"],
+  "exclude": []
+}

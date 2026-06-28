@@ -1,0 +1,18 @@
+# Cloudflare Pages + Workers config for Afferent Signal consumer app
+# https://developers.cloudflare.com/pages/
+
+name = "afferent-signal"
+compatibility_date = "2026-06-27"
+compatibility_flags = ["nodejs_compat"]
+
+# Pages build output
+pages_build_output_dir = ".next"
+
+[vars]
+# Non-secret env vars only — secrets go in Cloudflare Dashboard > Settings > Environment Variables
+NODE_ENV = "production"
+
+# Preview deployments (branch deploys)
+[env.preview]
+[env.preview.vars]
+NODE_ENV = "preview"
