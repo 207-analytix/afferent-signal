@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/layout/app-shell";
-import { QuickLinks } from "@/components/ui/quick-links";
+import QuickLinks from "@/components/ui/quick-links";
 import { supabase } from "@/lib/supabase";
 
 interface UserProfile {
@@ -22,9 +22,9 @@ const SIZES = ["1", "2", "3–4", "5+"];
 const FREQS = ["Daily", "2–3x/week", "Weekly", "Bi-weekly", "Monthly"];
 
 const QUICK_LINKS = [
-  { icon: "🛒", label: "My Requests", href: "/requests", color: "bg-blue-100 text-blue-600" },
-  { icon: "📣", label: "Campaigns", href: "/campaigns", color: "bg-emerald-100 text-emerald-600" },
-  { icon: "⭐", label: "Go Premium", href: "/premium", color: "bg-amber-100 text-amber-600" },
+  { icon: "🛒", label: "My Requests", href: "/requests", color: "bg-blue-100" },
+  { icon: "📣", label: "Campaigns",   href: "/campaigns", color: "bg-emerald-100" },
+  { icon: "⭐", label: "Go Premium",  href: "/premium",   color: "bg-amber-100" },
 ];
 
 export default function ProfilePage() {
@@ -42,7 +42,7 @@ export default function ProfilePage() {
         .select("user_id, email, display_name, zip_code, age_range, household_income, household_size, shopping_frequency, is_premium")
         .eq("user_id", user.id)
         .maybeSingle();
-      if (data) setProfile(data);
+      if (data) setProfile(data as UserProfile);
       else setProfile({ user_id: user.id, email: user.email ?? "" });
       setLoading(false);
     };

@@ -7,16 +7,20 @@ interface QuickLink {
   color: string;
 }
 
-const LINKS: QuickLink[] = [
+const DEFAULT_LINKS: QuickLink[] = [
   { label: "My Requests", href: "/requests", icon: "📋", color: "bg-blue-100" },
   { label: "Campaigns",   href: "/campaigns", icon: "📣", color: "bg-emerald-100" },
   { label: "Premium",     href: "/premium",   icon: "⭐", color: "bg-amber-100" },
 ];
 
-export default function QuickLinks() {
+interface QuickLinksProps {
+  links?: QuickLink[];
+}
+
+export default function QuickLinks({ links = DEFAULT_LINKS }: QuickLinksProps) {
   return (
     <div className="grid grid-cols-3 gap-3 py-2">
-      {LINKS.map(({ label, href, icon, color }) => (
+      {links.map(({ label, href, icon, color }) => (
         <Link
           key={href}
           href={href}
@@ -33,3 +37,5 @@ export default function QuickLinks() {
     </div>
   );
 }
+
+export type { QuickLink };
