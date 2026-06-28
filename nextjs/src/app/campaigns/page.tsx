@@ -1,9 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/layout/app-shell";
-import { TabToggle } from "@/components/ui/tab-toggle";
+import TabToggle from "@/components/ui/tab-toggle";
 import { EmptyState } from "@/components/ui/empty-state";
 import { supabase } from "@/lib/supabase";
+
+const TABS = ["All Campaigns", "My Campaigns"];
 
 interface Campaign {
   campaign_id: string;
@@ -20,7 +22,7 @@ interface Campaign {
 }
 
 export default function CampaignsPage() {
-  const [tab, setTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(TABS[0]);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [myCampaigns, setMyCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
@@ -170,11 +172,12 @@ export default function CampaignsPage() {
     <AppShell title="Campaigns">
       <div className="flex flex-col gap-4">
         <TabToggle
-          tabs={["All Campaigns", "My Campaigns"]}
-          onChange={(_, idx) => setTab(idx)}
+          tabs={TABS}
+          active={activeTab}
+          onChange={(tab) => setActiveTab(tab)}
         />
         <div className="flex flex-col gap-3">
-          {renderList(tab === 0 ? campaigns : myCampaigns)}
+          {renderList(activeTab === TABS[0] ? campaigns : myCampaigns)}
         </div>
       </div>
     </AppShell>
