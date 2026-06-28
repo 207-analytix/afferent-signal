@@ -1,6 +1,9 @@
 {
   "version": 1,
-  "description": "Route rules for Afferent Signal — protects /ops from public access",
+  "description": "Cloudflare Pages routing rules for Afferent Signal",
   "include": ["/*"],
-  "exclude": []
+  "exclude": [
+    "/ops",
+    "/ops/*"
+  ]
 }
