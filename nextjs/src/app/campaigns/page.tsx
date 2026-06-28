@@ -42,8 +42,8 @@ export default function CampaignsPage() {
         .limit(30);
 
       if (all) {
-        const enriched = all.map((c: Record<string, unknown>) => ({
-          ...(c as Campaign),
+        const enriched = all.map((c) => ({
+          ...(c as unknown as Campaign),
           supporter_count: Array.isArray(c.campaign_supporters)
             ? (c.campaign_supporters as Array<{ count: number }>)[0]?.count ?? 0
             : 0,
@@ -60,7 +60,7 @@ export default function CampaignsPage() {
         if (mine) {
           setMyCampaigns(
             mine
-              .map((row: Record<string, unknown>) => row.campaigns as Campaign)
+              .map((row) => (row as unknown as { campaigns: Campaign }).campaigns)
               .filter(Boolean)
           );
         }
@@ -153,7 +153,7 @@ export default function CampaignsPage() {
             </button>
           )}
           {c.is_supporting && (
-            <p className="text-center text-xs text-emerald-600 font-semibold">✓ You’re supporting this</p>
+            <p className="text-center text-xs text-emerald-600 font-semibold">✓ You&apos;re supporting this</p>
           )}
           {!userId && (
             <a
