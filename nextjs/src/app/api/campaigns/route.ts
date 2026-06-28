@@ -39,18 +39,20 @@ export async function GET(req: NextRequest) {
       if (joined) joinedSet = new Set(joined.map((j) => j.campaign_id));
     }
 
-    const result = (campaigns ?? []).map((c) => ({
-      campaign_id: c.campaign_id,
-      product_name: c.product_name,
-      brand_name: c.brand_name,
-      store_id: c.store_id,
-      location_label: c.location_label,
-      goal_count: c.goal_count,
-      status: c.status,
-      // @ts-expect-error Supabase count returns as array
-      supporter_count: c.campaign_supporters?.[0]?.count ?? 0,
-      is_joined: joinedSet.has(c.campaign_id),
-    }));
+    const result = (campaigns ?? []).map((c) => {
+      const supporters = c.campaign_supporters as unknown as { count: number }[];
+      return {
+        campaign_id: c.campaign_id,
+        product_name: c.product_name,
+        brand_name: c.brand_name,
+        store_id: c.store_id,
+        location_label: c.location_label,
+        goal_count: c.goal_count,
+        status: c.status,
+        supporter_count: supporters?.[0]?.count ?? 0,
+        is_joined: joinedSet.has(c.campaign_id),
+      };
+    });
 
     return NextResponse.json(result);
   } catch (err) {
