@@ -153,14 +153,14 @@ export default function ProfilePage() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-xs uppercase tracking-[0.18em] text-slate-500 font-semibold">Shopping Frequency</label>
+            <label className="text-xs uppercase tracking-[0.18em] text-slate-500 font-semibold">Household Income</label>
             <select
-              value={profile.shopping_frequency ?? ""}
-              onChange={(e) => update("shopping_frequency", e.target.value)}
+              value={profile.household_income ?? ""}
+              onChange={(e) => update("household_income", e.target.value)}
               className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">Select frequency</option>
-              {FREQS.map((f) => <option key={f} value={f}>{f}</option>)}
+              <option value="">Prefer not to say</option>
+              {INCOMES.map((inc) => <option key={inc} value={inc}>{inc}</option>)}
             </select>
           </div>
 
@@ -173,6 +173,18 @@ export default function ProfilePage() {
             >
               <option value="">Select size</option>
               {SIZES.map((s) => <option key={s} value={s}>{s} person{s === "1" ? "" : "s"}</option>)}
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-xs uppercase tracking-[0.18em] text-slate-500 font-semibold">Shopping Frequency</label>
+            <select
+              value={profile.shopping_frequency ?? ""}
+              onChange={(e) => update("shopping_frequency", e.target.value)}
+              className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select frequency</option>
+              {FREQS.map((f) => <option key={f} value={f}>{f}</option>)}
             </select>
           </div>
 
